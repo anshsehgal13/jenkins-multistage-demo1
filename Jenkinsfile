@@ -2,7 +2,6 @@ pipeline {
   agent any
 
   environment {
-    // Detect current branch or default to 'local' when run manually
     BRANCH = "${env.BRANCH_NAME ?: 'local'}"
   }
 
@@ -16,7 +15,6 @@ pipeline {
 
     stage('Checkout') {
       steps {
-        // Get the code from GitHub
         checkout scm
         echo "✅ Code checked out successfully."
       }
@@ -29,7 +27,6 @@ pipeline {
           steps {
             dir('api') {
               echo "🔧 Building API..."
-              // Simulate API build (no actual docker/npm needed)
               sh 'echo "Pretending to install dependencies and build API..."'
               sh 'ls -la || true'
             }
@@ -41,7 +38,6 @@ pipeline {
           steps {
             dir('ui') {
               echo "🎨 Building UI..."
-              // Simulate UI build (no actual npm)
               sh 'echo "Static UI detected. No build step required."'
               sh 'ls -la || true'
             }
@@ -51,29 +47,30 @@ pipeline {
     }
 
     stage('Test') {
-      steps {
-        echo "🧪 Running tests (simulated)..."
-        // Parallel testing example (no real tests needed)
-        parallel(
-          API_Tests: {
+      parallel {
+        stage('API Tests') {
+          steps {
             script {
               if (fileExists('api')) {
-                dir('api') { sh 'echo "API test passed ✅"' }
+                dir('api') { sh 'echo "✅ API tests passed successfully."' }
               } else {
                 echo "No API folder found."
               }
             }
-          },
-          UI_Tests: {
+          }
+        }
+
+        stage('UI Tests') {
+          steps {
             script {
               if (fileExists('ui')) {
-                dir('ui') { sh 'echo "UI test passed ✅"' }
+                dir('ui') { sh 'echo "✅ UI tests passed successfully."' }
               } else {
                 echo "No UI folder found."
               }
             }
           }
-        )
+        }
       }
     }
 
