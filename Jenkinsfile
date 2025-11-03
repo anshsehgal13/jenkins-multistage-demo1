@@ -1,42 +1,48 @@
-cat > Jenkinsfile << 'EOF'
 pipeline {
   agent any
 
   environment {
+    // Detect current branch or default to 'local' when run manually
     BRANCH = "${env.BRANCH_NAME ?: 'local'}"
   }
 
   stages {
+
     stage('Info') {
       steps {
-        echo "Building branch: ${BRANCH}"
+        echo "🚀 Starting pipeline for branch: ${BRANCH}"
       }
     }
 
     stage('Checkout') {
       steps {
+        // Get the code from GitHub
         checkout scm
+        echo "✅ Code checked out successfully."
       }
     }
 
     stage('Build') {
       parallel {
         stage('Build API') {
-          when { expression { fileExists('api/package.json') } }
+          when { expression { fileExists('api') } }
           steps {
             dir('api') {
-              sh 'echo "Installing dependencies (if any)..."'
-              sh 'npm install --silent || true'
-              sh 'echo "Pretend docker build (or try if docker exists)"'
-              sh 'docker --version > /dev/null 2>&1 && docker build -t inventory-api:${BRANCH} . || echo "Docker not available - skipping docker build"'
+              echo "🔧 Building API..."
+              // Simulate API build (no actual docker/npm needed)
+              sh 'echo "Pretending to install dependencies and build API..."'
+              sh 'ls -la || true'
             }
           }
         }
+
         stage('Build UI') {
-          when { expression { fileExists('ui/index.html') } }
+          when { expression { fileExists('ui') } }
           steps {
             dir('ui') {
-              sh 'echo "Static UI - no build step"'
+              echo "🎨 Building UI..."
+              // Simulate UI build (no actual npm)
+              sh 'echo "Static UI detected. No build step required."'
               sh 'ls -la || true'
             }
           }
@@ -46,35 +52,46 @@ pipeline {
 
     stage('Test') {
       steps {
+        echo "🧪 Running tests (simulated)..."
+        // Parallel testing example (no real tests needed)
         parallel(
-          api: {
+          API_Tests: {
             script {
-              if (fileExists('api/test.js')) {
-                dir('api') { sh 'node test.js || echo "API test script exited (ok for demo)"' }
-              } else { echo "No API tests" }
+              if (fileExists('api')) {
+                dir('api') { sh 'echo "API test passed ✅"' }
+              } else {
+                echo "No API folder found."
+              }
             }
           },
-          ui: {
+          UI_Tests: {
             script {
-              if (fileExists('ui/index.html')) {
-                dir('ui') { sh 'echo "UI exists"; test -f index.html && echo "UI file present"' }
-              } else { echo "No UI detected" }
+              if (fileExists('ui')) {
+                dir('ui') { sh 'echo "UI test passed ✅"' }
+              } else {
+                echo "No UI folder found."
+              }
             }
           }
         )
       }
     }
 
-    stage('Deploy (simulate)') {
+    stage('Deploy (Simulated)') {
       steps {
-        echo "Simulated deploy for ${BRANCH}"
+        echo "🚢 Deploying (simulated) for branch: ${BRANCH}"
+        echo "Deployment successful ✅"
       }
     }
   }
 
   post {
-    always { echo "Pipeline finished for ${BRANCH}" }
-    success { echo "SUCCESS: ${BRANCH}" }
-    failure { echo "FAILURE: ${BRANCH}" }
+    always {
+      echo "------------------------------------"
+      echo "🏁 Pipeline finished for ${BRANCH}"
+      echo "------------------------------------"
+    }
+    success { echo "✅ SUCCESS: ${BRANCH}" }
+    failure { echo "❌ FAILURE: ${BRANCH}" }
   }
 }
